@@ -19,9 +19,9 @@ contract Staker {
 
   mapping(address => uint256) public balances;
 
-  uint256 public immutable threshold = 10 ether;
+  uint256 public immutable threshold = 1 ether;
 
-  uint public immutable minStake = 0.5 ether;
+  uint public immutable minStake = 0.001 ether;
 
   uint256 public immutable deadline = block.timestamp + 72 hours;
 
