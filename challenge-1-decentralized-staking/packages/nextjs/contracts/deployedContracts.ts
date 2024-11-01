@@ -263,7 +263,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Staker: {
-      address: "0xD0aCFdf47DD26a87aCBE763fD9f795520a480764",
+      address: "0x4Fbd733f6a57d053BE7889a104eebD71b0967BbE",
       abi: [
         {
           inputs: [

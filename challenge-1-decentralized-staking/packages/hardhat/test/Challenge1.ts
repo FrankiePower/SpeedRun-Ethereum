@@ -97,7 +97,7 @@ describe("🚩 Challenge 1: 🔏 Decentralized Staking App", function () {
 
           console.log("\t", " 🔨 Staking...");
           const stakeResult = await stakerContract.connect(secondAccount).stake({
-            value: ethers.parseEther("1"),
+            value: ethers.parseEther("0.001"),
           });
           console.log("\t", " 🏷  stakeResult: ", stakeResult.hash);
 
@@ -142,7 +142,7 @@ describe("🚩 Challenge 1: 🔏 Decentralized Staking App", function () {
           const endingBalance = await ethers.provider.getBalance(secondAccount.address);
           //console.log("endingBalance after withdraw", ethers.formatEther(endingBalance))
 
-          expect(endingBalance).to.equal(startingBalance + ethers.parseEther("1") - gasCost);
+          expect(endingBalance).to.equal(startingBalance + ethers.parseEther("0.001") - gasCost);
         });
       }
     });
