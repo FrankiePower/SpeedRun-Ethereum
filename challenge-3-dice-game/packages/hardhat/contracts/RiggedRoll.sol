@@ -27,7 +27,7 @@ contract RiggedRoll is Ownable {
         // Revert if roll is above 5
         if(predictedRoll > 5) revert();
         
-        diceGame.rollTheDice{ value: 0.002 ether }();
+        diceGame.rollTheDice{ value: .002 ether }();
             
         nonce ++;
          
