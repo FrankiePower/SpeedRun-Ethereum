@@ -105,7 +105,7 @@ describe("🚩 Challenge 3: 🎲 Dice Game", function () {
       const expectedRoll = await getRoll(getRollLessThanFive);
       console.log("\t", "🎲 Expect roll to be less than or equal to 5. Dice Game Roll:", Number(expectedRoll));
 
-      const tx = await riggedRoll.riggedRoll();
+      const tx = await riggedRoll.riggedRoll({ value: rollAmount });
       const riggedRollAddress = await riggedRoll.getAddress();
 
       await expect(tx).to.emit(diceGame, "Roll").withArgs(riggedRollAddress, rollAmount, expectedRoll);
