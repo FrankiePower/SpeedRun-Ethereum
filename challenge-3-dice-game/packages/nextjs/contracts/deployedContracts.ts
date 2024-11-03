@@ -331,7 +331,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     RiggedRoll: {
-      address: "0x28831bD0B6AC849F9AeD92571bE7e41902023Ec9",
+      address: "0x9d21a882431a1F9B28AF437DcFB2DBCe5905C5eb",
       abi: [
         {
           inputs: [
@@ -413,7 +413,7 @@ const deployedContracts = {
           inputs: [],
           name: "riggedRoll",
           outputs: [],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
