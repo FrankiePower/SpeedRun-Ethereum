@@ -15,11 +15,11 @@ contract RiggedRoll is Ownable {
         diceGame = DiceGame(diceGameAddress);
     }
 
-    function withdraw(address _to, uint256 _amount) external onlyOwner {
-        require(_to != address(0), "Invalid address");
+    function withdraw(address _addr, uint256 _amount) external onlyOwner {
+        require(_addr != address(0), "Invalid address");
         require(address(this).balance >= _amount, "Insufficient balance in the contract");
         
-        (bool success, ) = _to.call{value: _amount}("");
+        (bool success, ) = _addr.call{value: _amount}("");
         require(success, "Transfer failed");
     }
 

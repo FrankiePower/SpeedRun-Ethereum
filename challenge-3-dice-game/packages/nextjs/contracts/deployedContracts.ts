@@ -234,7 +234,7 @@ const deployedContracts = {
   },
   11155111: {
     DiceGame: {
-      address: "0xA252f5E6E9De191A987a28A63Bf65AE9f62DCFAD",
+      address: "0x31c44310310E14259420322439F58339aeb8D259",
       abi: [
         {
           inputs: [],
@@ -331,7 +331,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     RiggedRoll: {
-      address: "0x9d21a882431a1F9B28AF437DcFB2DBCe5905C5eb",
+      address: "0x96251320462bfe046E573371b34AF83aeB4B9030",
       abi: [
         {
           inputs: [
@@ -364,6 +364,31 @@ const deployedContracts = {
           type: "event",
         },
         {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "roll",
+              type: "uint256",
+            },
+          ],
+          name: "Roll",
+          type: "event",
+        },
+        {
           inputs: [],
           name: "diceGame",
           outputs: [
@@ -371,19 +396,6 @@ const deployedContracts = {
               internalType: "contract DiceGame",
               name: "",
               type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "nonce",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -432,13 +444,13 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "address payable",
-              name: "to",
+              internalType: "address",
+              name: "_to",
               type: "address",
             },
             {
               internalType: "uint256",
-              name: "amount",
+              name: "_amount",
               type: "uint256",
             },
           ],
