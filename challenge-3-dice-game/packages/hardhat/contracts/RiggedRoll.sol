@@ -47,5 +47,4 @@ contract RiggedRoll is Ownable {
 	// Include the `receive()` function to enable the contract to receive incoming Ether.
 	receive() external payable {}
 
-
 }
