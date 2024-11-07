@@ -20,7 +20,7 @@ const deployRiggedRoll: DeployFunction = async function (hre: HardhatRuntimeEnvi
   const riggedRoll: RiggedRoll = await ethers.getContract("RiggedRoll", deployer);
 
   try {
-    await riggedRoll.transferOwnership("0x0752f523512Ad24E82739D3434C0710A4cA5058f");
+    await riggedRoll.transferOwnership("0x24e765Fcd00106D7175837848ec9073f9fEb9d8e");
   } catch (err) {
     console.log(err);
   }
