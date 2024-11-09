@@ -15,6 +15,7 @@ const deployerPrivateKey =
   process.env.DEPLOYER_PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 // If not set, it uses ours Etherscan default API key.
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
+const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const etherscanOptimisticApiKey = process.env.ETHERSCAN_OPTIMISTIC_API_KEY || "5WAJWBWKK5ZCWJ1HQKJ61CMY8SZRMQEK94";
 // forking rpc url
 const forkingURL = process.env.FORKING_URL || "";
@@ -34,7 +35,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: "localhost",
+  defaultNetwork: "sepolia",
   namedAccounts: {
     deployer: {
       // By default, it will take the first Hardhat account as the deployer
@@ -55,7 +56,7 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
     sepolia: {
-      url: `https://rpc2.sepolia.org`,
+      url: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
       accounts: [deployerPrivateKey],
     },
     arbitrum: {
