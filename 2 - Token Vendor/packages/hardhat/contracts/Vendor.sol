@@ -5,15 +5,26 @@ pragma solidity 0.8.4; //Do not change the solidity version as it negativly impa
 import "./YourToken.sol";
 
 contract Vendor {
-  // event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
 
   YourToken public yourToken;
+  uint256 public constant tokensPerEth = 100;
+
+  event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
+
 
   constructor(address tokenAddress) {
     yourToken = YourToken(tokenAddress);
   }
 
   // ToDo: create a payable buyTokens() function:
+  function buyTokens() public payable {
+    uint256 amountOfETH = msg.value;
+    uint256 amountOfTokens = amountOfETH * tokensPerEth;
+
+    yourToken.transfer(msg.sender, amountOfTokens);
+
+    emit BuyTokens(msg.sender, amountOfETH, amountOfTokens);
+  }
 
   // ToDo: create a withdraw() function that lets the owner withdraw ETH
 
