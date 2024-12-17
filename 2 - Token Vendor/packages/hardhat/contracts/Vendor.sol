@@ -1,10 +1,10 @@
 pragma solidity 0.8.4; //Do not change the solidity version as it negativly impacts submission grading
 // SPDX-License-Identifier: MIT
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./YourToken.sol";
 
-contract Vendor {
+contract Vendor is Ownable {
 
   YourToken public yourToken;
   uint256 public constant tokensPerEth = 100;
