@@ -10,6 +10,7 @@ contract Vendor is Ownable {
   uint256 public constant tokensPerEth = 100;
 
   event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
+  event SellTokens(address seller, uint256 amountOfTokens, uint256 amountOfETH);
 
 
   constructor(address tokenAddress) {
@@ -26,7 +27,18 @@ contract Vendor is Ownable {
     emit BuyTokens(msg.sender, amountOfETH, amountOfTokens);
   }
 
-  // ToDo: create a withdraw() function that lets the owner withdraw ETH
+  function withdraw() external onlyOwner {
+    (bool success,) = msg.sender.call{value: address(this).balance}("");
+    require(success, "External contract call failed.");
+    
+  }
 
   // ToDo: create a sellTokens(uint256 _amount) function:
+  function sellTokens(uint256 _amount) public {
+    yourToken.transferFrom(msg.sender, address(this), _amount);
+    uint256 amountOfETH = _amount / tokensPerEth;
+    (bool success,) = msg.sender.call{value: amountOfETH}("");
+    require(success, "External contract call failed.");
+    emit SellTokens(msg.sender, _amount, amountOfETH);
+  }
 }
