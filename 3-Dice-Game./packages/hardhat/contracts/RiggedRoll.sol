@@ -33,10 +33,10 @@ contract RiggedRoll is Ownable {
         );
         uint256 roll = uint256(hash) % 16;
 
-        if (roll > 5) revert() {
+        if (roll > 5) revert();
+
             diceGame.rollTheDice{value: .002 ether}();
-            nonce++;
-        }
+            nonce++;        
         
     }
     
