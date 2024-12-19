@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Streamer: {
-      address: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
       abi: [
         {
           anonymous: false,
@@ -185,6 +185,28 @@ const deployedContracts = {
               ],
               internalType: "struct Streamer.Voucher",
               name: "voucher",
+              type: "tuple",
+            },
+            {
+              components: [
+                {
+                  internalType: "bytes32",
+                  name: "r",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "s",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "uint8",
+                  name: "v",
+                  type: "uint8",
+                },
+              ],
+              internalType: "struct Streamer.Signature",
+              name: "sig",
               type: "tuple",
             },
           ],

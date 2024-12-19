@@ -1,13 +1,14 @@
 import { type FC, useEffect, useState } from "react";
 import { CashOutVoucherButton } from "./CashOutVoucherButton";
+import { Signature } from "ethers";
 import { Address as AddressType, encodePacked, formatEther, keccak256, parseEther, toBytes, verifyMessage } from "viem";
 import { Address } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useWatchBalance } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldWriteContract, useWatchBalance } from "~~/hooks/scaffold-eth";
 
 export const STREAM_ETH_VALUE = "0.5";
 export const ETH_PER_CHARACTER = "0.01";
 
-export type Voucher = { updatedBalance: bigint; signature: `0x${string}}` };
+export type Voucher = { updatedBalance: bigint; signature: `0x${string}` };
 
 type GuruProps = {
   challenged: Array<AddressType>;
@@ -22,6 +23,8 @@ export const Guru: FC<GuruProps> = ({ challenged, closed, opened, writable }) =>
 
   const [wisdoms, setWisdoms] = useState<{ [key: AddressType]: string }>({});
   const [vouchers, setVouchers] = useState<{ [key: AddressType]: Voucher }>({});
+
+  const {writeContractAsync} = useScaffoldWriteContract("Streamer");
 
   // channels
   const [channels, setChannels] = useState<{ [key: AddressType]: BroadcastChannel }>({});
@@ -48,6 +51,23 @@ export const Guru: FC<GuruProps> = ({ challenged, closed, opened, writable }) =>
   });
 
   const provideService = (client: AddressType, wisdom: string) => {
+    const existingVoucher = vouchers[client];
+
+    if (existingVoucher) {
+
+      const bestVoucherBalance = existingVoucher.updatedBalance;
+      const wisdomSize = wisdom.length;
+      
+      const maxWisdomSize = Number(bestVoucherBalance) * 100;
+
+      if (wisdomSize > maxWisdomSize) {
+        console.warn(
+          `Wisdom too large for voucher. Wisdom length: ${wisdomSize}. Max wisdom length: ${maxWisdomSize}.`
+        )
+
+        return;
+    }
+
     setWisdoms({ ...wisdoms, [client]: wisdom });
     channels[client]?.postMessage(wisdom);
   };
@@ -67,15 +87,21 @@ export const Guru: FC<GuruProps> = ({ challenged, closed, opened, writable }) =>
       }
       const updatedBalance = BigInt(`0x${data.updatedBalance}`);
 
-      /*
-       *  Checkpoint 3:
-       *
-       *  currently, this function receives and stores vouchers uncritically.
-       *
-       *  recreate the packed, hashed, and arrayified message from reimburseService (above),
-       *  and then use verifyMessage() to confirm that voucher signer was
-       *  `clientAddress`. (If it wasn't, log some error message and return).
-       */
+      const packed = encodePacked(["uint256"], [updatedBalance]);
+      const hashed = keccak256(packed);
+      const arrayified = toBytes(hashed);
+
+      const verified = await verifyMessage({
+        address: clientAddress,
+        message: { raw: arrayified },
+        signature: data.signature,
+      });
+
+      if (verified !== true) {
+        console.error(`Voucher from ${clientAddress} was signed by ${verified}, not the expected ${clientAddress}`);
+        return;
+      }
+
       const existingVoucher = vouchers[clientAddress];
 
       // update our stored voucher if this new one is more valuable
@@ -132,13 +158,13 @@ export const Guru: FC<GuruProps> = ({ challenged, closed, opened, writable }) =>
             </div>
 
             {/* Checkpoint 4: */}
-            {/* <CashOutVoucherButton
+            <CashOutVoucherButton
               key={clientAddress}
               clientAddress={clientAddress}
               challenged={challenged}
               closed={closed}
               voucher={vouchers[clientAddress]}
-            /> */}
+            />
           </div>
         ))}
       </div>

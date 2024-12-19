@@ -139,57 +139,59 @@ export const Rube: FC<RubeProps> = ({ challenged, closed, writable }) => {
           </div>
 
           {/* Checkpoint 5: challenge & closure */}
-          {/* <div className="flex flex-col items-center pb-6">
-            <button
-              disabled={challenged.includes(userAddress)}
-              className="btn btn-primary"
-              onClick={async () => {
-                // disable the production of further voucher signatures
-                setAutoPay(false);
+          {
+            <div className="flex flex-col items-center pb-6">
+              <button
+                disabled={challenged.includes(userAddress)}
+                className="btn btn-primary"
+                onClick={async () => {
+                  // disable the production of further voucher signatures
+                  setAutoPay(false);
 
-                try {
-                  await writeStreamerContractAsync({ functionName: "challengeChannel" });
-                } catch (err) {
-                  console.error("Error calling challengeChannel function");
-                }
+                  try {
+                    await writeStreamerContractAsync({ functionName: "challengeChannel" });
+                  } catch (err) {
+                    console.error("Error calling challengeChannel function");
+                  }
 
-                try {
-                  // ensure a 'ticking clock' for the UI without having
-                  // to send new transactions & mine new blocks
-                  createTestClient({
-                    chain: hardhat,
-                    mode: "hardhat",
-                    transport: http(),
-                  })?.setIntervalMining({
-                    interval: 5,
-                  });
-                } catch (e) {}
-              }}
-            >
-              Challenge this channel
-            </button>
+                  try {
+                    // ensure a 'ticking clock' for the UI without having
+                    // to send new transactions & mine new blocks
+                    createTestClient({
+                      chain: hardhat,
+                      mode: "hardhat",
+                      transport: http(),
+                    })?.setIntervalMining({
+                      interval: 5,
+                    });
+                  } catch (e) {}
+                }}
+              >
+                Challenge this channel
+              </button>
 
-            <div className="p-2 mt-6 h-10">
-              {challenged.includes(userAddress) && !!timeLeft && (
-                <>
-                  <span>Time left:</span> {humanizeDuration(Number(timeLeft) * 1000)}
-                </>
-              )}
+              <div className="p-2 mt-6 h-10">
+                {challenged.includes(userAddress) && !!timeLeft && (
+                  <>
+                    <span>Time left:</span> {humanizeDuration(Number(timeLeft) * 1000)}
+                  </>
+                )}
+              </div>
+              <button
+                className="btn btn-primary"
+                disabled={!challenged.includes(userAddress) || !!timeLeft}
+                onClick={async () => {
+                  try {
+                    await writeStreamerContractAsync({ functionName: "defundChannel" });
+                  } catch (err) {
+                    console.error("Error calling defundChannel function");
+                  }
+                }}
+              >
+                Close and withdraw funds
+              </button>
             </div>
-            <button
-              className="btn btn-primary"
-              disabled={!challenged.includes(userAddress) || !!timeLeft}
-              onClick={async () => {
-                try {
-                  await writeStreamerContractAsync({ functionName: "defundChannel" });
-                } catch (err) {
-                  console.error("Error calling defundChannel function");
-                }
-              }}
-            >
-              Close and withdraw funds
-            </button>
-          </div> */}
+          }
         </div>
       ) : userAddress && closed.includes(userAddress) ? (
         <div className="text-lg">
