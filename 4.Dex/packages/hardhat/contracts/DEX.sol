@@ -130,15 +130,13 @@ contract DEX {
 		require(msg.value > 0, "Can't deposit 0 ETH.");
 		uint256 ethReserve = address(this).balance - msg.value;
 		uint256 tokenReserve = token.balanceOf(address(this));
-		uint256 tokenDeposit;
-
-		tokenDeposit = ((msg.value * tokenReserve) / ethReserve) + 1;
+		uint256 tokenDeposit = ((msg.value * tokenReserve) / ethReserve) + 1;
 
 		uint256 liquidityMinted = (msg.value * totalLiquidity) / ethReserve;
 		liquidity[msg.sender] += liquidityMinted;
 		totalLiquidity += liquidityMinted;
 
-		require(token.transfer(msg.sender,address(this), tokenDeposit));
+		require(token.transferFrom(msg.sender,address(this), tokenDeposit));
 
 		emit LiquidityProvided(msg.sender, liquidityMinted, msg.value, tokenDeposit);
 
@@ -147,5 +145,29 @@ contract DEX {
 
 	function withdraw(
 		uint256 amount
-	) public returns (uint256 ethAmount, uint256 tokenAmount) {}
+	) public returns (uint256 ethAmount, uint256 tokenAmount) {
+
+		require(liquidity[msg.sender] >= amount, "Not enough liquidity to withdraw");
+
+		uint256 ethReserves = address(this).balance;
+
+		uint256 tokenReserves = token.balanceOf(address(this));
+
+		uint256 ethAmountWithdrawn = (amount * ethReserves) / totalLiquidity;
+
+		uint256 tokenAmountWithdrawn = (amount * tokenReserves) / totalLiquidity;
+
+		liquidity[msg.sender] = liquidity[msg.sender] - ethAmountWithdrawn;
+
+		totalLiquidity = totalLiquidity - ethAmountWithdrawn;
+
+		(bool sent,) = payable(msg.sender).call{value: ethAmountWithdrawn}("");
+		require(sent,"Withdrawal Failed");
+
+		require(token.transfer(msg.sender, tokenAmountWithdrawn));
+
+		emit LiquidityRemoved(msg.sender,amount, tokenAmountWithdrawn, ethAmountWithdrawn);
+
+		return (ethAmountWithdrawn, tokenAmountWithdrawn);
+	}
 }
