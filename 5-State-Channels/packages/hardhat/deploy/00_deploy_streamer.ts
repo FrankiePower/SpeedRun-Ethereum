@@ -33,18 +33,18 @@ const deployStreamer: DeployFunction = async function (hre: HardhatRuntimeEnviro
     autoMine: true,
   });
 
-  // // *Checkpoint 1*
-  // // Get the deployed contract
-  // const streamer: Streamer = await hre.ethers.getContract("Streamer", deployer);
+  // *Checkpoint 1*
+  // Get the deployed contract
+  const streamer: Streamer = await hre.ethers.getContract("Streamer", deployer);
 
-  // // Transfer ownership to your front end address
-  // console.log("\n 🤹  Sending ownership to frontend address...\n");
-  // const ownerTx = await streamer.transferOwnership("** YOUR FRONTEND ADDRESS **");
-  // console.log("\n       confirming...\n");
-  // const ownershipResult = await ownerTx.wait();
-  // if (ownershipResult) {
-  //   console.log("       ✅ ownership transferred successfully!\n");
-  // }
+  // Transfer ownership to your front end address
+  console.log("\n 🤹  Sending ownership to frontend address...\n");
+  const ownerTx = await streamer.transferOwnership("0xb5c5653D28c0bC4F7E783B1a277eDF564A9ea805");
+  console.log("\n       confirming...\n");
+  const ownershipResult = await ownerTx.wait();
+  if (ownershipResult) {
+    console.log("       ✅ ownership transferred successfully!\n");
+  }
 };
 
 export default deployStreamer;
