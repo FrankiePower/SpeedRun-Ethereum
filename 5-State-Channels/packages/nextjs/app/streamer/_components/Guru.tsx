@@ -24,7 +24,7 @@ export const Guru: FC<GuruProps> = ({ challenged, closed, opened, writable }) =>
   const [wisdoms, setWisdoms] = useState<{ [key: AddressType]: string }>({});
   const [vouchers, setVouchers] = useState<{ [key: AddressType]: Voucher }>({});
 
-  const {writeContractAsync} = useScaffoldWriteContract("Streamer");
+  const { writeContractAsync } = useScaffoldWriteContract("Streamer");
 
   // channels
   const [channels, setChannels] = useState<{ [key: AddressType]: BroadcastChannel }>({});
@@ -54,120 +54,120 @@ export const Guru: FC<GuruProps> = ({ challenged, closed, opened, writable }) =>
     const existingVoucher = vouchers[client];
 
     if (existingVoucher) {
-
       const bestVoucherBalance = existingVoucher.updatedBalance;
       const wisdomSize = wisdom.length;
-      
+
       const maxWisdomSize = Number(bestVoucherBalance) * 100;
 
       if (wisdomSize > maxWisdomSize) {
         console.warn(
-          `Wisdom too large for voucher. Wisdom length: ${wisdomSize}. Max wisdom length: ${maxWisdomSize}.`
-        )
+          `Wisdom too large for voucher. Wisdom length: ${wisdomSize}. Max wisdom length: ${maxWisdomSize}.`,
+        );
 
         return;
+      }
+
+      setWisdoms({ ...wisdoms, [client]: wisdom });
+      channels[client]?.postMessage(wisdom);
     }
 
-    setWisdoms({ ...wisdoms, [client]: wisdom });
-    channels[client]?.postMessage(wisdom);
-  };
-
-  /**
-   * wraps a voucher processing function for each client.
-   */
-  function receiveVoucher(clientAddress: AddressType) {
     /**
-     * Handle incoming payments from the given client.
+     * wraps a voucher processing function for each client.
      */
-    async function processVoucher({ data }: { data: Pick<Voucher, "signature"> & { updatedBalance: string } }) {
-      // recreate a bigint object from the message. v.data.updatedBalance is
-      // a string representation of the bigint for transit over the network
-      if (!data.updatedBalance) {
-        return;
+    function receiveVoucher(clientAddress: AddressType) {
+      /**
+       * Handle incoming payments from the given client.
+       */
+      async function processVoucher({ data }: { data: Pick<Voucher, "signature"> & { updatedBalance: string } }) {
+        // recreate a bigint object from the message. v.data.updatedBalance is
+        // a string representation of the bigint for transit over the network
+        if (!data.updatedBalance) {
+          return;
+        }
+        const updatedBalance = BigInt(`0x${data.updatedBalance}`);
+
+        const packed = encodePacked(["uint256"], [updatedBalance]);
+        const hashed = keccak256(packed);
+        const arrayified = toBytes(hashed);
+
+        const verified = await verifyMessage({
+          address: clientAddress,
+          message: { raw: arrayified },
+          signature: data.signature,
+        });
+
+        if (verified !== true) {
+          console.error(`Voucher from ${clientAddress} was signed by ${verified}, not the expected ${clientAddress}`);
+          return;
+        }
+
+        const existingVoucher = vouchers[clientAddress];
+
+        // update our stored voucher if this new one is more valuable
+        if (existingVoucher === undefined || updatedBalance < existingVoucher.updatedBalance) {
+          setVouchers(vouchers => ({ ...vouchers, [clientAddress]: { ...data, updatedBalance } }));
+        }
       }
-      const updatedBalance = BigInt(`0x${data.updatedBalance}`);
 
-      const packed = encodePacked(["uint256"], [updatedBalance]);
-      const hashed = keccak256(packed);
-      const arrayified = toBytes(hashed);
-
-      const verified = await verifyMessage({
-        address: clientAddress,
-        message: { raw: arrayified },
-        signature: data.signature,
-      });
-
-      if (verified !== true) {
-        console.error(`Voucher from ${clientAddress} was signed by ${verified}, not the expected ${clientAddress}`);
-        return;
-      }
-
-      const existingVoucher = vouchers[clientAddress];
-
-      // update our stored voucher if this new one is more valuable
-      if (existingVoucher === undefined || updatedBalance < existingVoucher.updatedBalance) {
-        setVouchers(vouchers => ({ ...vouchers, [clientAddress]: { ...data, updatedBalance } }));
-      }
+      return processVoucher;
     }
 
-    return processVoucher;
-  }
+    return (
+      <>
+        <p className="block text-2xl mt-0 mb-2 font-semibold">Hello Guru!</p>
+        <p className="block text-xl mt-0 mb-1 font-semibold">
+          You have {writable.length} channel{writable.length == 1 ? "" : "s"} open
+        </p>
+        <p className="mt-0 text-lg text-center font-semibold">
+          Total ETH locked: {Number(formatEther(balance?.value || 0n)).toFixed(4)} ETH
+        </p>
+        <div className="mt-4 text-lg">
+          Channels with <button className="btn btn-sm btn-error">RED</button> withdrawal buttons are under challenge
+          on-chain, and should be redeemed ASAP.
+        </div>
+        <div className="mt-4 w-full flex flex-col">
+          {writable.map(clientAddress => (
+            <div key={clientAddress} className="w-full flex flex-col border-primary border-t py-6">
+              <Address address={clientAddress} size="xl" />
+              <textarea
+                className="mt-3 bg-base-200"
+                rows={3}
+                placeholder="Provide your wisdom here..."
+                onChange={e => {
+                  e.stopPropagation();
+                  const updatedWisdom = e.target.value;
+                  provideService(clientAddress, updatedWisdom);
+                }}
+                value={wisdoms[clientAddress]}
+              />
 
-  return (
-    <>
-      <p className="block text-2xl mt-0 mb-2 font-semibold">Hello Guru!</p>
-      <p className="block text-xl mt-0 mb-1 font-semibold">
-        You have {writable.length} channel{writable.length == 1 ? "" : "s"} open
-      </p>
-      <p className="mt-0 text-lg text-center font-semibold">
-        Total ETH locked: {Number(formatEther(balance?.value || 0n)).toFixed(4)} ETH
-      </p>
-      <div className="mt-4 text-lg">
-        Channels with <button className="btn btn-sm btn-error">RED</button> withdrawal buttons are under challenge
-        on-chain, and should be redeemed ASAP.
-      </div>
-      <div className="mt-4 w-full flex flex-col">
-        {writable.map(clientAddress => (
-          <div key={clientAddress} className="w-full flex flex-col border-primary border-t py-6">
-            <Address address={clientAddress} size="xl" />
-            <textarea
-              className="mt-3 bg-base-200"
-              rows={3}
-              placeholder="Provide your wisdom here..."
-              onChange={e => {
-                e.stopPropagation();
-                const updatedWisdom = e.target.value;
-                provideService(clientAddress, updatedWisdom);
-              }}
-              value={wisdoms[clientAddress]}
-            />
+              <div className="mt-2 flex justify-between">
+                <div>
+                  Served: <strong>{wisdoms[clientAddress]?.length || 0}</strong>&nbsp;chars
+                </div>
+                <div>
+                  Received:{" "}
+                  <strong id={`claimable-${clientAddress}`}>
+                    {vouchers[clientAddress]
+                      ? formatEther(parseEther(STREAM_ETH_VALUE) - vouchers[clientAddress].updatedBalance)
+                      : 0}
+                  </strong>
+                  &nbsp;ETH
+                </div>
+              </div>
 
-            <div className="mt-2 flex justify-between">
-              <div>
-                Served: <strong>{wisdoms[clientAddress]?.length || 0}</strong>&nbsp;chars
-              </div>
-              <div>
-                Received:{" "}
-                <strong id={`claimable-${clientAddress}`}>
-                  {vouchers[clientAddress]
-                    ? formatEther(parseEther(STREAM_ETH_VALUE) - vouchers[clientAddress].updatedBalance)
-                    : 0}
-                </strong>
-                &nbsp;ETH
-              </div>
+              {/* Checkpoint 4: */}
+              <CashOutVoucherButton
+                key={clientAddress}
+                clientAddress={clientAddress}
+                challenged={challenged}
+                closed={closed}
+                voucher={vouchers[clientAddress]}
+              />
             </div>
-
-            {/* Checkpoint 4: */}
-            <CashOutVoucherButton
-              key={clientAddress}
-              clientAddress={clientAddress}
-              challenged={challenged}
-              closed={closed}
-              voucher={vouchers[clientAddress]}
-            />
-          </div>
-        ))}
-      </div>
-    </>
-  );
+          ))}
+        </div>
+      </>
+    );
+  };
 };
